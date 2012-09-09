@@ -65,7 +65,7 @@ namespace :db do
   end
 
   desc "Create a new migration"
-  task :new_migration do |t|
+  task :new_migration, :migration_name, :migration_class do |t, args|
     migration_name = ENV['name'] || args[:name]
     if migration_name.nil?
       puts "Error: must provide name of migration to generate."
