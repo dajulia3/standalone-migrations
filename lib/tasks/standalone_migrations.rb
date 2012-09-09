@@ -66,7 +66,8 @@ namespace :db do
 
   desc "Create a new migration"
   task :new_migration, :migration_name, :migration_class do |t, args|
-    migration_name = ENV['name'] || args[:name]
+    args.with_defaults :migration_class => "ActiveRecord::Migration"
+    migration_name = args[:migration_name]
     if migration_name.nil?
       puts "Error: must provide name of migration to generate."
       puts "Usage (via an environment variable): rake #{t.name} name=add_field_to_form"
