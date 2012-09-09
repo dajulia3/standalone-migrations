@@ -28,10 +28,10 @@ module Rails
 
     def s.paths
       {
-        "db/migrate"   => [standalone_configurator.migrate_dir],
-        "db/seeds.rb"  => [standalone_configurator.seeds],
-        "db/schema.rb" => [standalone_configurator.schema]
-      } 
+          "db/migrate"   => [standalone_configurator.migrate_dir],
+          "db/seeds.rb"  => [standalone_configurator.seeds],
+          "db/schema.rb" => [standalone_configurator.schema]
+      }
     end
 
     def s.config
@@ -41,7 +41,7 @@ module Rails
       end
       s
     end
-    
+
     def s.load_seed
       seed_file = paths["db/seeds.rb"].select{ |f| File.exists?(f) }.first
       load(seed_file) if seed_file
@@ -66,14 +66,21 @@ namespace :db do
 
   desc "Create a new migration"
   task :new_migration do |t|
-    unless migration = ENV['name']
+    migration_name = ENV['name'] || args[:name]
+    if migration_name.nil?
       puts "Error: must provide name of migration to generate."
-      puts "For example: rake #{t.name} name=add_field_to_form"
+      puts "Usage (via an environment variable): rake #{t.name} name=add_field_to_form"
+      puts "Usage (via a parameter): rake #{t.name}[name=add_field_to_form]"
       abort
     end
 
+    if args[:migration_class].nil?
+      migration_class = "ActiveRecord::Migration"
+    else
+      migration_class = ENV['migration_class']
+    end
     file_contents = <<eof
-class #{class_name migration} < ActiveRecord::Migration
+class #{class_name migration} < #{migration_class}
   def self.up
   end
 
@@ -82,7 +89,12 @@ class #{class_name migration} < ActiveRecord::Migration
   end
 end
 eof
-    filename = migration.underscore
+    if migration_class.nil?
+      migration_type = 'std'
+    else
+      migration_type = migration_class
+    end
+    filename = migration.underscore+"_#{migration_type}"
     create_file file_name(filename), file_contents
     puts "Created migration #{file_name filename}"
   end
