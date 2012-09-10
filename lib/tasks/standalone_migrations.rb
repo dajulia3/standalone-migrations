@@ -66,7 +66,7 @@ namespace :db do
 
   desc "Create a new migration"
   task :new_migration, :migration_name do |t, args|
-    unless migration = args[:migration_name]
+    unless migration = args.migration_name
       puts "Error: must provide name of migration to generate."
       puts "For example: rake #{t.name} name=add_field_to_form"
       abort
