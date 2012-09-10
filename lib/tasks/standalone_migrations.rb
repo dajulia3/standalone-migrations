@@ -28,10 +28,10 @@ module Rails
 
     def s.paths
       {
-          "db/migrate"   => [standalone_configurator.migrate_dir],
-          "db/seeds.rb"  => [standalone_configurator.seeds],
-          "db/schema.rb" => [standalone_configurator.schema]
-      }
+        "db/migrate"   => [standalone_configurator.migrate_dir],
+        "db/seeds.rb"  => [standalone_configurator.seeds],
+        "db/schema.rb" => [standalone_configurator.schema]
+      } 
     end
 
     def s.config
@@ -41,7 +41,7 @@ module Rails
       end
       s
     end
-
+    
     def s.load_seed
       seed_file = paths["db/seeds.rb"].select{ |f| File.exists?(f) }.first
       load(seed_file) if seed_file
@@ -65,23 +65,15 @@ namespace :db do
   end
 
   desc "Create a new migration"
-  task :new_migration, :migration_name, :migration_class do |t, args|
-    args.with_defaults :migration_class => "ActiveRecord::Migration"
-    migration_name = args[:migration_name]
-    if migration_name.nil?
+  task :new_migration, :migration_name do |t, args|
+    unless migration = args[:migration_name]
       puts "Error: must provide name of migration to generate."
-      puts "Usage (via an environment variable): rake #{t.name} name=add_field_to_form"
-      puts "Usage (via a parameter): rake #{t.name}[name=add_field_to_form]"
+      puts "For example: rake #{t.name} name=add_field_to_form"
       abort
     end
 
-    if args[:migration_class].nil?
-      migration_class = "ActiveRecord::Migration"
-    else
-      migration_class = ENV['migration_class']
-    end
     file_contents = <<eof
-class #{class_name migration} < #{migration_class}
+class #{class_name migration} < ActiveRecord::Migration
   def self.up
   end
 
@@ -90,12 +82,7 @@ class #{class_name migration} < #{migration_class}
   end
 end
 eof
-    if migration_class.nil?
-      migration_type = 'std'
-    else
-      migration_type = migration_class
-    end
-    filename = migration.underscore+"_#{migration_type}"
+    filename = migration.underscore
     create_file file_name(filename), file_contents
     puts "Created migration #{file_name filename}"
   end
